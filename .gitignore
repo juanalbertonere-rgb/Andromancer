@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+andromancer.log
+*.vec
+agent_state.json
