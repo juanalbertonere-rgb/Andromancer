@@ -34,12 +34,20 @@ class UIScrapeCapability(ADBCapability, Capability):
 
                 root = ET.fromstring(xml_content)
                 elements = self._parse_nodes(root)
-                screen_summary = self._summarize_screen(elements)
+
+                # Identify current package
+                current_package = "unknown"
+                if elements:
+                    # Try to find the most common package or just the first one
+                    current_package = elements[0].get('package', 'unknown')
+
+                screen_summary = self._summarize_screen(elements, current_package)
 
                 return ExecutionResult(True, data={
                     "xml": xml_content,
                     "elements": elements,
-                    "summary": screen_summary
+                    "summary": screen_summary,
+                    "current_package": current_package
                 })
             except Exception as e:
                 return ExecutionResult(False, error=f"XML parse error: {str(e)}")
@@ -60,6 +68,9 @@ class UIScrapeCapability(ADBCapability, Capability):
                 })
         return elements
 
-    def _summarize_screen(self, elements: List[Dict]) -> str:
+    def _summarize_screen(self, elements: List[Dict], package: str = "unknown") -> str:
         texts = [e['text'] or e['content_desc'] for e in elements[:10] if e['text'] or e['content_desc']]
-        return "Screen with: " + ", ".join(texts) if texts else "Screen with no visible text"
+        base = f"App: {package} | "
+        if texts:
+            return base + "Screen with: " + ", ".join(texts)
+        return base + "Screen with no visible text"
