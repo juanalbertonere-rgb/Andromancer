@@ -1,4 +1,8 @@
 # AndroMancer
+<p align="center">
+  <img src="assets/nombre_de_tu_archivo.gif" width="250" alt="AndroMancer Android Hello">
+</p>
+
 ![GitHub stars](https://img.shields.io/github/stars/juanalbertonere-rgb/andromancer?style=social)
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
 ![License](https://img.shields.io/badge/license-Apache%202.0-green)
