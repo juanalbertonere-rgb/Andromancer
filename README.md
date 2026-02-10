@@ -1,4 +1,4 @@
-# AndroMancer v12.0
+# AndroMancer
 
 **An autonomous Android agent powered by AI reasoning and modular skills.**
 
