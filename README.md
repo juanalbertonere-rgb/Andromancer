@@ -1,6 +1,6 @@
 # AndroMancer
 <p align="center">
-  <img src="assets/lv_0_20260210155446-ezgif.com-video-to-gif-converter.gif" width="250" alt="AndroMancer Android Hello">
+  <img src="assets/lv_0_20260210155446-ezgif.com-video-to-gif-converter.gif" width="200" alt="AndroMancer Android Hello">
 </p>
 
 ![GitHub stars](https://img.shields.io/github/stars/juanalbertonere-rgb/andromancer?style=social)
