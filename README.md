@@ -12,7 +12,7 @@ AndroMancer is an intelligent automation framework that enables devices running 
 
 - **Python 3.8+** (or Termux on Android)
 - **ADB** (Android Debug Bridge) installed and configured
-- **Android device** with wireless debugging enabled
+- **Android device** with wireless debugging enabled and USB Debugging
 - **GROQ API Key** (or alternative LLM provider)
 - **Node.js 14+** (for web dashboard)
 
