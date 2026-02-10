@@ -1,6 +1,6 @@
 # AndroMancer
 <p align="center">
-  <img src="assets/nombre_de_tu_archivo.gif" width="250" alt="AndroMancer Android Hello">
+  <img src="assets/android.gif" width="250" alt="AndroMancer Android Hello">
 </p>
 
 ![GitHub stars](https://img.shields.io/github/stars/juanalbertonere-rgb/andromancer?style=social)
