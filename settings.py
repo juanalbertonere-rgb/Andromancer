@@ -33,7 +33,7 @@ LOG_FILE = STATE_DIR / "agent.log"
 # -----------------------
 # IA / LLM (override with env)
 # -----------------------
-GROQ_API_KEY = _env("GROQ_API_KEY", "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")
+GROQ_API_KEY = _env("GROQ_API_KEY", "Enter_your_API_key_here")
 MODEL_NAME = _env("MODEL_NAME", "llama-3.3-70b-versatile")
 MAX_STEPS = int(_env("MAX_STEPS", 20))
 
