@@ -6,7 +6,8 @@
 ![GitHub stars](https://img.shields.io/github/stars/juanalbertonere-rgb/andromancer?style=social)
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
 ![License](https://img.shields.io/badge/license-Apache%202.0-green)
-![LLM](https://img.shields.io/badge/LLM-Groq%20|%20Llama%203.3-orange)
+![LLM](https://img.shields.io/badge/LLM-Groq%20|%20Llama%204%20Scout-orange)
+
 
 **An autonomous Android agent powered by AI reasoning and modular skills.**
 
