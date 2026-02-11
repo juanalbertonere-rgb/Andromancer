@@ -2,43 +2,42 @@ import re
 from typing import Dict, Any, List
 from andromancer.skills.base import Skill, SkillResult, SkillPriority
 from andromancer.utils.adb import adb_manager
+from andromancer.utils.apps import get_package_name
+from andromancer.utils.text import normalize_text
 
 class AppOpenerSkill(Skill):
     name = "AppOpener"
     priority = SkillPriority.CRITICAL
 
     async def evaluate(self, goal: str, observation: Dict[str, Any], history: List[Any]) -> SkillResult:
-        goal_lower = goal.lower()
+        goal_norm = normalize_text(goal)
 
         # 1. Detect intent and app name candidate
         # Matches "abre whatsapp", "open settings", "abre el chat de whatsapp", etc.
-        # Note: Ordered from most specific to least specific
-        match = re.search(r"(?:abre|open|lanza|ve a)\s+(?:el\s+chat\s+de\s+|la\s+app\s+de\s+|el\s+|la\s+)?([a-zA-Z0-9]+)", goal_lower)
+        # Supports both Spanish and English triggers and filler words
+        triggers = r"abre|open|lanza|launch|ve a|go to|pon|start|busca|search"
+        fillers = r"la aplicacion de|the app|el app|la app|app|el chat de|the chat|de|el|la|un|una|the"
+
+        pattern = rf"(?:{triggers})\s+(?:(?:{fillers})\s+)*([a-z0-9\s]+)"
+        match = re.search(pattern, goal_norm)
 
         if not match:
             return SkillResult(can_handle=False, confidence=0.0, actions=[])
 
-        app_name = match.group(1).lower()
+        captured = match.group(1).strip()
+
+        # Handle multi-word apps like "play store"
+        if captured.startswith("play store"):
+            app_name = "play store"
+        else:
+            app_name = captured.split()[0]
 
         # Noise filter
-        if app_name in ["el", "la", "un", "una", "chat", "app", "este", "ese"]:
+        if not app_name or app_name in ["este", "ese", "aqui", "here", "la", "el"]:
             return SkillResult(can_handle=False, confidence=0.0, actions=[])
 
-        # Level 1: Simple Map
-        app_map = {
-            "whatsapp": "com.whatsapp",
-            "chrome": "com.android.chrome",
-            "settings": "com.android.settings",
-            "ajustes": "com.android.settings",
-            "configuracion": "com.android.settings",
-            "instagram": "com.instagram.android",
-            "twitter": "com.twitter.android",
-            "gmail": "com.google.android.gm",
-            "youtube": "com.google.android.youtube",
-            "facebook": "com.facebook.katana"
-        }
-
-        target_package = app_map.get(app_name)
+        # Level 1: Centralized Map
+        target_package = get_package_name(app_name)
         current_package = observation.get("current_package", "")
 
         # 2. Check if already open
