@@ -127,6 +127,34 @@ Analyze the current state and decide next actions.
         self.thought_history.append(thought)
         return thought
 
+    async def generate_summary(self, goal: str, status: str) -> str:
+        """Generates a natural language summary of the mission's outcome and actions."""
+        history_summary = []
+        for t in self.thought_history:
+            action_names = [a.get("capability") for a in t.action_plan]
+            history_summary.append(f"Paso {t.step}: {t.reasoning} -> Acciones: {action_names} ({t.reflection})")
+
+        history_text = "\n".join(history_summary)
+
+        system_prompt = "Eres AndroMancer. Resume lo que has hecho para el usuario en su mismo idioma."
+        user_prompt = f"""El usuario quería: {goal}
+Resultado final: {status}
+
+Historial de acciones:
+{history_text}
+
+Genera un mensaje breve y natural (máximo 3 frases) informando al usuario qué has conseguido y si tuviste algún problema.
+Si el usuario preguntó en español, responde en español. Si preguntó en inglés, responde en inglés. Adapta el idioma.
+Ejemplo: 'Ya he abierto WhatsApp por ti y he enviado el mensaje. Tuve un pequeño problema al principio encontrando el contacto, pero ya está solucionado.'
+"""
+
+        try:
+            return await self.llm.complete_text(system_prompt, user_prompt)
+        except Exception as e:
+            logger.error(f"Failed to generate summary: {e}")
+
+        return f"Misión finalizada con estado: {status}."
+
     async def reflect(self, thought: Thought, result: Any) -> Thought:
         # Simplified reflection for now, could use LLM again
         success_str = "Success" if getattr(result, 'success', False) else "Failed"
