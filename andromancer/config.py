@@ -37,7 +37,7 @@ LOG_FILE = STATE_DIR / "agent.log"
 
 # AI / LLM
 GROQ_API_KEY = _env("GROQ_API_KEY", "")
-MODEL_NAME = _env("MODEL_NAME", "llama-3.3-70b-versatile")
+MODEL_NAME = _env("MODEL_NAME", "meta-llama/llama-4-scout-17b-16e-instruct")
 MAX_STEPS = int(_env("MAX_STEPS", 20))
 
 # ADB

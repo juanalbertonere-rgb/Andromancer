@@ -19,7 +19,7 @@ For each step, think in this format:
 
 **Thought**: Analyze current state and decide next action
 **Action**: Choose ONE capability to execute
-**Params**: JSON parameters for the capability
+**Params**: JSON parameters matching the capability's required parameters
 **Confidence**: 0.0-1.0 how sure you are
 
 ## Output Format (JSON)
@@ -46,6 +46,7 @@ For each step, think in this format:
 4. Ask for help if stuck after 3 failed attempts
 5. NEVER execute high-risk actions without confirmation
 6. Consider suggestions from specialized skills if provided.
+7. Use ONLY the parameters defined in the capability definition.
 
 ## Current Context
 Goal: {goal}

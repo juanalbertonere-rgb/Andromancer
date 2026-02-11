@@ -1,6 +1,7 @@
 from __future__ import annotations
 import asyncio
 import subprocess
+import inspect
 from abc import ABC, abstractmethod
 import time
 import logging
@@ -62,10 +63,34 @@ class CapabilityRegistry:
             {
                 "name": cap.name,
                 "description": cap.description,
-                "risk": cap.risk_level
+                "risk": cap.risk_level,
+                "parameters": self._get_cap_params(cap)
             }
             for cap in self._capabilities.values()
         ]
+
+    def _get_cap_params(self, cap: Capability) -> Dict[str, str]:
+        sig = inspect.signature(cap.execute)
+        params = {}
+        for name, param in sig.parameters.items():
+            if name in ['self', 'kwargs']:
+                continue
+
+            # Get type hint if available
+            type_name = "any"
+            if param.annotation != inspect.Parameter.empty:
+                if hasattr(param.annotation, '__name__'):
+                    type_name = param.annotation.__name__
+                else:
+                    type_name = str(param.annotation).replace('typing.', '')
+
+            # Indicate if optional
+            suffix = ""
+            if param.default != inspect.Parameter.empty:
+                suffix = f" (optional, default: {param.default})"
+
+            params[name] = f"{type_name}{suffix}"
+        return params
 
     async def execute(self, name: str, params: Dict, context: Dict = None) -> ExecutionResult:
         cap = self._capabilities.get(name)
