@@ -30,7 +30,7 @@ AndroMancer is an intelligent automation framework that enables devices running 
 1. **Clone or extract the repository:**
    ```bash
    git clone https://github.com/juanalbertonere-rgb/Andromancer.git
-   cd andromancer
+   cd Andromancer
    ```
 
 2. **Install Python dependencies:**
