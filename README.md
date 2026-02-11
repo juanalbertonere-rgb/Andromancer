@@ -233,7 +233,7 @@ Three priority levels:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `GROQ_API_KEY` | (required) | Your GROQ API key |
-| `MODEL_NAME` | `llama-3.3-70b-versatile` | LLM model to use |
+| `MODEL_NAME` | `meta-llama/llama-4-scout-17b-16e-instruct` | LLM model to use |
 | `MAX_STEPS` | 20 | Maximum action steps per mission |
 | `ADB_TIMEOUT` | 15 | ADB command timeout (seconds) |
 | `ADB_DELAY` | 1.0 | Delay between ADB commands |
@@ -252,7 +252,7 @@ Alternative to `.env` for advanced users:
 ```python
 # settings.py
 GROQ_API_KEY = "sk-..."
-MODEL_NAME = "llama-3.3-70b-versatile"
+MODEL_NAME = "meta-llama/llama-4-scout-17b-16e-instruct"
 MAX_STEPS = 20
 AUTONOMY_LEVEL = "full"
 CONFIDENCE_THRESHOLD = 0.75
@@ -445,7 +445,7 @@ adb devices
 curl -X POST https://api.groq.com/openai/v1/chat/completions \
   -H "Authorization: Bearer $GROQ_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"model":"llama-3.3-70b-versatile","messages":[{"role":"user","content":"test"}]}'
+  -d '{"model":"meta-llama/llama-4-scout-17b-16e-instruct","messages":[{"role":"user","content":"test"}]}'
 ```
 
 ### App Not Opening
@@ -537,7 +537,7 @@ AndroMancer is designed for automation of your own Android devices. **Use respon
 
 ### GROQ API
 - [GROQ Console](https://console.groq.com)
-- Models: llama-3.3-70b, mixtral-8x7b-32768, and more
+- Models: Llama 4 Scout, GPT OSS 120B, and more
 
 ---
 
