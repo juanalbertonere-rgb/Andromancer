@@ -55,7 +55,7 @@ AndroMancer is an intelligent automation framework that enables devices running 
    Edit `.env` with your configuration:
    ```env
    GROQ_API_KEY=your_actual_api_key_here
-   MODEL_NAME=llama-3.3-70b-versatile
+   MODEL_NAME=meta-llama/llama-4-scout-17b-16e-instruct
    MAX_STEPS=20
    ADB_TIMEOUT=15
    LOG_LEVEL=INFO
