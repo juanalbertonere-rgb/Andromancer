@@ -6,7 +6,11 @@ class OpenAppCapability(ADBCapability, Capability):
     description = "Abre aplicación por nombre o package"
     risk_level = "low"
 
-    async def execute(self, app_name: str) -> ExecutionResult:
+    async def execute(self, app_name: str = None, package: str = None) -> ExecutionResult:
+        identifier = package or app_name
+        if not identifier:
+            return ExecutionResult(False, error="app_name or package is required")
+
         app_map = {
             "whatsapp": "com.whatsapp",
             "chrome": "com.android.chrome",
@@ -16,14 +20,14 @@ class OpenAppCapability(ADBCapability, Capability):
             "twitter": "com.twitter.android",
             "gmail": "com.google.android.gm"
         }
-        package = app_map.get(app_name.lower(), app_name)
+        target_package = app_map.get(identifier.lower(), identifier)
 
-        if package == "HOME":
+        if target_package == "HOME":
             await self._adb(["shell", "input", "keyevent", "3"])
         else:
-            result = await self._adb(["shell", "monkey", "-p", package, "1"])
+            result = await self._adb(["shell", "monkey", "-p", target_package, "1"])
             if result.returncode != 0:
-                return ExecutionResult(False, error=f"Failed to open {package}: {result.stderr}")
+                return ExecutionResult(False, error=f"Failed to open {target_package}: {result.stderr}")
 
         await asyncio.sleep(1.5)
-        return ExecutionResult(True, data={"package": package})
+        return ExecutionResult(True, data={"package": target_package})
