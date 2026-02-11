@@ -52,3 +52,34 @@ class AsyncLLMClient:
         except Exception as e:
             logger.error(f"LLM call failed: {e}")
             raise LLMError(f"Failed to call LLM: {str(e)}")
+
+    async def complete_text(self, system_prompt: str, user_prompt: str, timeout: float = 30.0) -> str:
+        """Simple text completion without JSON format enforcement"""
+        if not self.api_key:
+            raise LLMError("API Key not found")
+
+        try:
+            async with httpx.AsyncClient() as client:
+                resp = await client.post(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {self.api_key}"},
+                    json={
+                        "model": self.model,
+                        "messages": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": user_prompt}
+                        ],
+                        "temperature": 0.7
+                    },
+                    timeout=timeout
+                )
+
+            if resp.status_code >= 400:
+                raise LLMError(f"LLM request failed: {resp.status_code}")
+
+            body = resp.json()
+            return body["choices"][0]["message"]["content"]
+
+        except Exception as e:
+            logger.error(f"LLM text call failed: {e}")
+            return f"Error: {str(e)}"

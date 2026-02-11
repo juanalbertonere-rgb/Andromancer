@@ -16,6 +16,8 @@ from andromancer.core.memory import memory_store
 from andromancer.skills.base import SkillRegistry, SkillResult
 from andromancer.skills.critical.app_opener import AppOpenerSkill
 from andromancer.skills.advisory.settings_escape import SettingsEscapeSkill
+from andromancer.skills.advisory.search import SearchSkill
+from andromancer.skills.advisory.scroll import ScrollSkill
 from andromancer.skills.emergency.pattern import PatternSkill
 from andromancer.skills.emergency.home_rescue import EmergencyHomeSkill
 
@@ -35,6 +37,7 @@ class EventType(Enum):
     SAFETY_CHECK = auto()
     SKILL_START = auto()
     SKILL_END = auto()
+    REPORT = auto()
 
 @dataclass
 class AgentEvent:
@@ -112,6 +115,8 @@ class AndroMancerAgent:
     def _register_default_skills(self):
         self.skill_registry.register(AppOpenerSkill())
         self.skill_registry.register(SettingsEscapeSkill())
+        self.skill_registry.register(SearchSkill())
+        self.skill_registry.register(ScrollSkill())
         self.skill_registry.register(PatternSkill())
         self.skill_registry.register(EmergencyHomeSkill())
 
@@ -300,6 +305,21 @@ class AndroMancerAgent:
     async def _complete_mission(self):
         if self.mission and self.mission.status != MissionStatus.FAILED:
             self.mission.status = MissionStatus.COMPLETED
+
+        # Generate AI Summary
+        summary = "Misión finalizada."
+        if self.mission:
+            summary = await self.reasoning.generate_summary(
+                self.mission.goal,
+                self.mission.status.name
+            )
+            print(f"\n🤖 {summary}\n") # Output to console for user
+
+        await event_bus.emit(AgentEvent(
+            time.time(), EventType.REPORT,
+            {"summary": summary}
+        ))
+
         await event_bus.emit(AgentEvent(
             time.time(), EventType.COMPLETION,
             {"mission_id": self.mission.id if self.mission else None, "status": self.mission.status.name if self.mission else "UNKNOWN"}
