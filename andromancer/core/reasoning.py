@@ -40,13 +40,16 @@ For each step, think in this format:
 }}
 
 ## Rules
-1. ALWAYS analyze UI state before acting
-2. If action fails, try alternative approach (don't repeat same action)
-3. Use memory of past experiences
-4. Ask for help if stuck after 3 failed attempts
-5. NEVER execute high-risk actions without confirmation
-6. Consider suggestions from specialized skills if provided.
-7. Use ONLY the parameters defined in the capability definition.
+1. ALWAYS analyze UI state before acting.
+2. If an action fails, analyze WHY and try an alternative approach.
+3. Use memory of past experiences to avoid repeating mistakes.
+4. For complex goals, decompose them into sub-tasks (e.g., 'Open WhatsApp', 'Send Message', 'Open YouTube').
+5. If a non-critical sub-task fails (e.g., PiP mode not available), report it but CONTINUE with the next sub-task.
+6. Use the `get_secret` capability to retrieve credentials when needed instead of asking the user immediately.
+7. Use the `wait` capability if you expect a screen to take time to load.
+8. NEVER execute high-risk actions without confirmation.
+9. Consider suggestions from specialized skills if provided.
+10. Use ONLY the parameters defined in the capability definition.
 
 ## Current Context
 Goal: {goal}
@@ -99,7 +102,7 @@ Analyze the current state and decide next actions.
                 goal=goal,
                 step=step,
                 max_steps=cfg.MAX_STEPS,
-                action_history=[t.action_plan for t in self.thought_history[-3:]],
+                action_history=[t.action_plan for t in self.thought_history[-10:]],
                 memories=memory_context,
                 skill_context=skill_context
             )
@@ -143,9 +146,10 @@ Resultado final: {status}
 Historial de acciones:
 {history_text}
 
-Genera un mensaje breve y natural (máximo 3 frases) informando al usuario qué has conseguido y si tuviste algún problema.
+Genera un mensaje natural y detallado (pero conciso) informando al usuario sobre el progreso de CADA sub-tarea mencionada en el objetivo.
+Menciona explícitamente qué se logró y qué falló (si algo falló, explica brevemente por qué y que continuaste con lo demás).
 Si el usuario preguntó en español, responde en español. Si preguntó en inglés, responde en inglés. Adapta el idioma.
-Ejemplo: 'Ya he abierto WhatsApp por ti y he enviado el mensaje. Tuve un pequeño problema al principio encontrando el contacto, pero ya está solucionado.'
+Ejemplo: 'He enviado el mensaje de WhatsApp a tu mamá. En YouTube busqué el tutorial, pero no pude activar el modo PiP, así que continué con la nota en Keep y el login en LeetCode. ¡Todo lo demás está listo!'
 """
 
         try:
