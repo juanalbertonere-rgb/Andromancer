@@ -23,3 +23,12 @@ class OpenAppCapability(ADBCapability, Capability):
 
         await asyncio.sleep(1.5)
         return ExecutionResult(True, data={"package": target_package})
+
+class WaitCapability(Capability):
+    name = "wait"
+    description = "Espera una cantidad determinada de segundos (útil para pantallas de carga)"
+    risk_level = "low"
+
+    async def execute(self, seconds: float = 2.0) -> ExecutionResult:
+        await asyncio.sleep(seconds)
+        return ExecutionResult(True, data={"waited_seconds": seconds})

@@ -52,3 +52,4 @@ SAFETY_CHECKPOINTS = _bool_env("SAFETY_CHECKPOINTS", True)
 
 # Logging
 LOG_LEVEL = _env("LOG_LEVEL", "INFO")
+SILENT_MODE = _bool_env("SILENT_MODE", False)

@@ -3,6 +3,7 @@ import logging
 from datetime import datetime
 from andromancer.core.agent import AndroMancerAgent, MissionStatus, event_bus, AgentEvent
 from andromancer.core.memory import memory_store
+from andromancer import config as cfg
 
 logger = logging.getLogger("AndroMancer.CLI")
 
@@ -76,14 +77,16 @@ class AndroMancerCLI:
             await asyncio.sleep(1)
             if self.agent.mission.current_step != last_step:
                 last_step = self.agent.mission.current_step
-                print(f"📍 Step {self.agent.mission.current_step}/{self.agent.mission.max_steps}", end="\r")
+                if not cfg.SILENT_MODE:
+                    print(f"📍 Step {self.agent.mission.current_step}/{self.agent.mission.max_steps}", end="\r")
 
         if self.agent.mission:
-            print()
-            if self.agent.mission.status == MissionStatus.COMPLETED:
-                print(f"✅ Mission completed in {self.agent.mission.current_step} steps")
-            elif self.agent.mission.status == MissionStatus.FAILED:
-                print(f"❌ Mission failed at step {self.agent.mission.current_step}")
+            if not cfg.SILENT_MODE:
+                print()
+                if self.agent.mission.status == MissionStatus.COMPLETED:
+                    print(f"✅ Mission completed in {self.agent.mission.current_step} steps")
+                elif self.agent.mission.status == MissionStatus.FAILED:
+                    print(f"❌ Mission failed at step {self.agent.mission.current_step}")
 
     async def _cmd_status(self, _):
         if self.agent.mission:

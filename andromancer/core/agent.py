@@ -18,12 +18,14 @@ from andromancer.skills.critical.app_opener import AppOpenerSkill
 from andromancer.skills.advisory.settings_escape import SettingsEscapeSkill
 from andromancer.skills.advisory.search import SearchSkill
 from andromancer.skills.advisory.scroll import ScrollSkill
+from andromancer.skills.advisory.exploration import ExplorationSkill
 from andromancer.skills.emergency.pattern import PatternSkill
 from andromancer.skills.emergency.home_rescue import EmergencyHomeSkill
 
 from andromancer.core.capabilities.interaction import TapCapability, TypeCapability, SwipeCapability, BackCapability
 from andromancer.core.capabilities.observation import UIScrapeCapability
-from andromancer.core.capabilities.navigation import OpenAppCapability
+from andromancer.core.capabilities.navigation import OpenAppCapability, WaitCapability
+from andromancer.core.capabilities.secrets import GetSecretCapability
 
 logger = logging.getLogger("AndroMancer.Agent")
 
@@ -111,17 +113,22 @@ class AndroMancerAgent:
         self.registry.register(BackCapability())
         self.registry.register(UIScrapeCapability())
         self.registry.register(OpenAppCapability())
+        self.registry.register(GetSecretCapability())
+        self.registry.register(WaitCapability())
 
     def _register_default_skills(self):
         self.skill_registry.register(AppOpenerSkill())
         self.skill_registry.register(SettingsEscapeSkill())
         self.skill_registry.register(SearchSkill())
         self.skill_registry.register(ScrollSkill())
+        self.skill_registry.register(ExplorationSkill())
         self.skill_registry.register(PatternSkill())
         self.skill_registry.register(EmergencyHomeSkill())
 
     async def _log_events(self, event: AgentEvent):
+        """Logs events and handles silent mode logic if necessary."""
         logger.info(f"[{event.type.name}] {event.content}")
+        # In silent mode, CLI suppresses step indicators, but core events still reach subscribers.
 
     async def start_mission(self, goal: str, resume: bool = False) -> Mission:
         if resume and self.state_file.exists():
