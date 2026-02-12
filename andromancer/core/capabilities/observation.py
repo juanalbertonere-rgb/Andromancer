@@ -1,4 +1,5 @@
 import os
+import re
 import asyncio
 import tempfile
 import xml.etree.ElementTree as ET
@@ -69,8 +70,20 @@ class UIScrapeCapability(ADBCapability, Capability):
         return elements
 
     def _summarize_screen(self, elements: List[Dict], package: str = "unknown") -> str:
-        texts = [e['text'] or e['content_desc'] for e in elements[:10] if e['text'] or e['content_desc']]
+        summary_items = []
+        for e in elements[:25]:
+            text = e['text'] or e['content_desc']
+            if text:
+                # Extract center from bounds "[x1,y1][x2,y2]"
+                bounds = e.get('bounds', '')
+                nums = [int(n) for n in re.findall(r"-?\d+", bounds)]
+                if len(nums) >= 4:
+                    x, y = (nums[0] + nums[2]) // 2, (nums[1] + nums[3]) // 2
+                    summary_items.append(f"'{text}' at ({x},{y})")
+                else:
+                    summary_items.append(f"'{text}'")
+
         base = f"App: {package} | "
-        if texts:
-            return base + "Screen with: " + ", ".join(texts)
-        return base + "Screen with no visible text"
+        if summary_items:
+            return base + "Screen with: " + ", ".join(summary_items)
+        return base + "Screen with no visible clickable elements"
