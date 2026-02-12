@@ -228,6 +228,9 @@ class AndroMancerAgent:
                         await self.reasoning.reflect(thought, result)
                         if not result.success:
                             await self._handle_failure(action, result, thought)
+                        else:
+                            # Clear previous errors if we have a success
+                            self.reasoning.working_memory.pop("last_action_error", None)
 
                 retry_count = 0
                 self.mission.current_step += 1
@@ -248,16 +251,35 @@ class AndroMancerAgent:
 
         await self._complete_mission()
 
+    def _validate_action(self, action: Dict) -> Optional[str]:
+        """Validates action parameters before execution"""
+        cap_name = action.get("capability")
+        params = action.get("params", {})
+
+        if cap_name == "tap":
+            if not (params.get("x") is not None and params.get("y") is not None) and not params.get("element"):
+                return "Action 'tap' requires either 'x' and 'y' coordinates OR an 'element' dictionary. None provided. Check the UI observation again for coordinates."
+
+        if cap_name == "type":
+            if not params.get("text"):
+                return "Action 'type' requires 'text' parameter."
+
+        return None
+
     async def _execute_plan(self, actions: List[Dict]) -> List[ExecutionResult]:
         """Execute actions, supporting parallel execution if configured"""
         if not cfg.PARALLEL_ACTIONS:
             results = []
             for action in actions:
-                result = await self.registry.execute(
-                    action["capability"],
-                    action.get("params", {}),
-                    {"mission": self.mission.id}
-                )
+                error = self._validate_action(action)
+                if error:
+                    result = ExecutionResult(False, error=error)
+                else:
+                    result = await self.registry.execute(
+                        action["capability"],
+                        action.get("params", {}),
+                        {"mission": self.mission.id}
+                    )
                 results.append(result)
                 await event_bus.emit(AgentEvent(
                     time.time(), EventType.ACTION,
@@ -273,10 +295,16 @@ class AndroMancerAgent:
 
         results: List[ExecutionResult] = []
         if independent:
-            tasks = [
-                self.registry.execute(a["capability"], a.get("params", {}), {"mission": self.mission.id})
-                for a in independent
-            ]
+            tasks = []
+            for a in independent:
+                error = self._validate_action(a)
+                if error:
+                    # Create a dummy task that returns the error
+                    async def dummy_fail(e): return ExecutionResult(False, error=e)
+                    tasks.append(dummy_fail(error))
+                else:
+                    tasks.append(self.registry.execute(a["capability"], a.get("params", {}), {"mission": self.mission.id}))
+
             parallel_results = await asyncio.gather(*tasks, return_exceptions=False)
             results.extend(parallel_results)
 
@@ -287,9 +315,13 @@ class AndroMancerAgent:
                 ))
 
         for action in dependent:
-            result = await self.registry.execute(
-                action["capability"], action.get("params", {}), {"mission": self.mission.id}
-            )
+            error = self._validate_action(action)
+            if error:
+                result = ExecutionResult(False, error=error)
+            else:
+                result = await self.registry.execute(
+                    action["capability"], action.get("params", {}), {"mission": self.mission.id}
+                )
             results.append(result)
             await event_bus.emit(AgentEvent(
                 time.time(), EventType.ACTION,
@@ -308,6 +340,7 @@ class AndroMancerAgent:
 
     async def _handle_failure(self, action: Dict, result: ExecutionResult, thought: Thought):
         logger.warning(f"Action failed: {action['capability']}. Error: {result.error}")
+        self.reasoning.working_memory["last_action_error"] = f"Action '{action['capability']}' failed: {result.error}"
 
     async def _complete_mission(self):
         if self.mission and self.mission.status != MissionStatus.FAILED:
